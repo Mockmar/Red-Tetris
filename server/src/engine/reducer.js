@@ -1,17 +1,16 @@
-import { clearLines, mergePieceIntoBoard } from "./board"
-import { canPlace } from "./collision"
-import { createRandomPiece } from "./state"
-import type { GameState, Piece } from "./types"
+const { clearLines, mergePieceIntoBoard } = require("./board")
+const { canPlace } = require("./collision")
+const { createRandomPiece } = require("./state")
 
-function movePiece(piece: Piece, dx: number, dy: number): Piece {
+function movePiece(piece, dx, dy) {
   return {
     ...piece,
     x: piece.x + dx,
-    y: piece.y + dy
+    y: piece.y + dy,
   }
 }
 
-export function moveLeft(state: GameState): GameState {
+function moveLeft(state) {
   const nextPiece = movePiece(state.activePiece, -1, 0)
 
   if (!canPlace(state.board, nextPiece)) {
@@ -20,11 +19,11 @@ export function moveLeft(state: GameState): GameState {
 
   return {
     ...state,
-    activePiece: nextPiece
+    activePiece: nextPiece,
   }
 }
 
-export function moveRight(state: GameState): GameState {
+function moveRight(state) {
   const nextPiece = movePiece(state.activePiece, 1, 0)
 
   if (!canPlace(state.board, nextPiece)) {
@@ -33,11 +32,11 @@ export function moveRight(state: GameState): GameState {
 
   return {
     ...state,
-    activePiece: nextPiece
+    activePiece: nextPiece,
   }
 }
 
-export function moveDown(state: GameState): GameState {
+function moveDown(state) {
   const nextPiece = movePiece(state.activePiece, 0, 1)
 
   if (!canPlace(state.board, nextPiece)) {
@@ -46,25 +45,25 @@ export function moveDown(state: GameState): GameState {
 
   return {
     ...state,
-    activePiece: nextPiece
+    activePiece: nextPiece,
   }
 }
 
-export function step(state: GameState): GameState {
+function step(state) {
   const nextPiece = movePiece(state.activePiece, 0, 1)
 
   if (canPlace(state.board, nextPiece)) {
     return {
       ...state,
       activePiece: nextPiece,
-      touchingFloor: false
+      touchingFloor: false,
     }
   }
 
   if (!state.touchingFloor) {
     return {
       ...state,
-      touchingFloor: true
+      touchingFloor: true,
     }
   }
 
@@ -77,7 +76,7 @@ export function step(state: GameState): GameState {
     return {
       ...state,
       board: clearedBoard,
-      status: "over"
+      status: "over",
     }
   }
 
@@ -85,15 +84,14 @@ export function step(state: GameState): GameState {
     ...state,
     board: clearedBoard,
     activePiece: newPiece,
-    touchingFloor: false
+    touchingFloor: false,
   }
 }
 
-export function rotate(state: GameState): GameState {
-
-  const nextPiece: Piece = {
+function rotate(state) {
+  const nextPiece = {
     ...state.activePiece,
-    rotation: (state.activePiece.rotation + 1) % 4
+    rotation: (state.activePiece.rotation + 1) % 4,
   }
 
   if (!canPlace(state.board, nextPiece)) {
@@ -102,11 +100,11 @@ export function rotate(state: GameState): GameState {
 
   return {
     ...state,
-    activePiece: nextPiece
+    activePiece: nextPiece,
   }
 }
 
-export function hardDrop(state: GameState): GameState {
+function hardDrop(state) {
   let droppedPiece = state.activePiece
 
   while (true) {
@@ -130,7 +128,7 @@ export function hardDrop(state: GameState): GameState {
       board: clearedBoard,
       activePiece: newPiece,
       touchingFloor: false,
-      status: "over"
+      status: "over",
     }
   }
 
@@ -139,6 +137,15 @@ export function hardDrop(state: GameState): GameState {
     board: clearedBoard,
     activePiece: newPiece,
     touchingFloor: false,
-    status: "running"
+    status: "running",
   }
+}
+
+module.exports = {
+  moveLeft,
+  moveRight,
+  moveDown,
+  step,
+  rotate,
+  hardDrop,
 }
