@@ -52,12 +52,13 @@ io.on("connection", (socket) => {
       roomId: game.roomId,
       hostId: game.hostId,
       status: game.status,
-      players: game.getPlayersList()
+      players: game.getPlayersList(),
     })
   })
 
   socket.on("join_room", ({ roomId, playerName }) => {
     console.log("join_room", roomId, playerName)
+
     if (!roomId || !playerName) {
       return
     }
@@ -66,7 +67,7 @@ io.on("connection", (socket) => {
 
     if (game.status !== "waiting") {
       socket.emit("join_error", {
-        message: "A game is already running in this room"
+        message: "A game is already running in this room",
       })
       return
     }
@@ -80,38 +81,11 @@ io.on("connection", (socket) => {
       roomId: game.roomId,
       hostId: game.hostId,
       status: game.status,
-      players: game.getPlayersList()
+      players: game.getPlayersList(),
     })
   })
 
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id)
-
-    for (const [roomId, game] of gameManager.games.entries()) {
-      if (game.getPlayer(socket.id)) {
-
-        game.removePlayer(socket.id)
-
-        io.to(roomId).emit("room_update", {
-          roomId: game.roomId,
-          hostId: game.hostId,
-          status: game.status,
-          players: game.getPlayersList()
-        })
-
-        if (game.players.size === 0 && game.loop) {
-          clearInterval(game.loop)
-          game.loop = null
-        }
-
-        gameManager.removeGameIfEmpty(roomId)
-
-        break
-      }
-    }
-  })
-
-    socket.on("player_input", ({ roomId, type }) => {
+  socket.on("player_input", ({ roomId, type }) => {
     const game = gameManager.getGame(roomId)
 
     if (!game || game.status !== "running") {
@@ -147,13 +121,32 @@ io.on("connection", (socket) => {
         return
     }
 
-    io.to(player.socketId).emit("game_state", {
-      self: player.state,
-      roomId: game.roomId,
-      hostId: game.hostId,
-      status: game.status,
-      players: game.getPlayersList(),
-    })
+    game.broadcastStates(io)
+  })
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id)
+
+    for (const [roomId, game] of gameManager.games.entries()) {
+      if (game.getPlayer(socket.id)) {
+        game.removePlayer(socket.id)
+
+        io.to(roomId).emit("room_update", {
+          roomId: game.roomId,
+          hostId: game.hostId,
+          status: game.status,
+          players: game.getPlayersList(),
+        })
+
+        if (game.players.size === 0 && game.loop) {
+          clearInterval(game.loop)
+          game.loop = null
+        }
+
+        gameManager.removeGameIfEmpty(roomId)
+        break
+      }
+    }
   })
 })
 

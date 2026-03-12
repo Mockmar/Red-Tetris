@@ -10,6 +10,32 @@ function movePiece(piece, dx, dy) {
   }
 }
 
+function lockPieceAndSpawn(state, piece) {
+  const mergedBoard = mergePieceIntoBoard(state.board, piece)
+  const { board: clearedBoard, cleared } = clearLines(mergedBoard)
+
+  const newPiece = createRandomPiece()
+
+  if (!canPlace(clearedBoard, newPiece)) {
+    return {
+      ...state,
+      board: clearedBoard,
+      touchingFloor: false,
+      status: "over",
+      cleared,
+    }
+  }
+
+  return {
+    ...state,
+    board: clearedBoard,
+    activePiece: newPiece,
+    touchingFloor: false,
+    status: "running",
+    cleared,
+  }
+}
+
 function moveLeft(state) {
   const nextPiece = movePiece(state.activePiece, -1, 0)
 
@@ -57,6 +83,7 @@ function step(state) {
       ...state,
       activePiece: nextPiece,
       touchingFloor: false,
+      cleared: 0,
     }
   }
 
@@ -64,28 +91,11 @@ function step(state) {
     return {
       ...state,
       touchingFloor: true,
+      cleared: 0,
     }
   }
 
-  const mergedBoard = mergePieceIntoBoard(state.board, state.activePiece)
-  const { board: clearedBoard } = clearLines(mergedBoard)
-
-  const newPiece = createRandomPiece()
-
-  if (!canPlace(clearedBoard, newPiece)) {
-    return {
-      ...state,
-      board: clearedBoard,
-      status: "over",
-    }
-  }
-
-  return {
-    ...state,
-    board: clearedBoard,
-    activePiece: newPiece,
-    touchingFloor: false,
-  }
+  return lockPieceAndSpawn(state, state.activePiece)
 }
 
 function rotate(state) {
@@ -117,28 +127,7 @@ function hardDrop(state) {
     droppedPiece = nextPiece
   }
 
-  const mergedBoard = mergePieceIntoBoard(state.board, droppedPiece)
-  const { board: clearedBoard } = clearLines(mergedBoard)
-
-  const newPiece = createRandomPiece()
-
-  if (!canPlace(clearedBoard, newPiece)) {
-    return {
-      ...state,
-      board: clearedBoard,
-      activePiece: newPiece,
-      touchingFloor: false,
-      status: "over",
-    }
-  }
-
-  return {
-    ...state,
-    board: clearedBoard,
-    activePiece: newPiece,
-    touchingFloor: false,
-    status: "running",
-  }
+  return lockPieceAndSpawn(state, droppedPiece)
 }
 
 module.exports = {

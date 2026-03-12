@@ -1,12 +1,6 @@
 import { getPieceMatrix, isPieceCell } from "../engine/pieces"
-import type { Board, Piece } from "../engine/types"
 
-type Props = {
-  board: Board
-  piece: Piece
-}
-
-export default function BoardView({ board, piece }: Props) {
+export default function BoardView({ board, piece }) {
   const matrix = getPieceMatrix(piece)
 
   return (

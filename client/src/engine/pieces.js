@@ -1,8 +1,4 @@
-import type { PieceType, Piece } from "./types"
-
-export type PieceMatrix = number[][]
-
-export const PIECES: Record<PieceType, PieceMatrix> = {
+export const PIECES = {
   I: [
     [0, 0, 0, 0],
     [1, 1, 1, 1],
@@ -40,7 +36,7 @@ export const PIECES: Record<PieceType, PieceMatrix> = {
   ]
 }
 
-export function getPieceMatrix(piece: Piece): PieceMatrix {
+export function getPieceMatrix(piece) {
   let matrix = PIECES[piece.type]
 
   for (let i = 0; i < piece.rotation; i++) {
@@ -50,7 +46,7 @@ export function getPieceMatrix(piece: Piece): PieceMatrix {
   return matrix
 }
 
-export function isPieceCell(piece: Piece, x: number, y: number, matrix: PieceMatrix): boolean {
+export function isPieceCell(piece, x, y, matrix) {
   const localX = x - piece.x
   const localY = y - piece.y
 
@@ -60,10 +56,10 @@ export function isPieceCell(piece: Piece, x: number, y: number, matrix: PieceMat
   return matrix[localY][localX] === 1
 }
 
-export function rotateMatrix(matrix: PieceMatrix): PieceMatrix {
+export function rotateMatrix(matrix) {
   const size = matrix.length
 
-  const rotated: PieceMatrix = Array.from({ length: size }, () =>
+  const rotated = Array.from({ length: size }, () =>
     Array.from({ length: size }, () => 0)
   )
 

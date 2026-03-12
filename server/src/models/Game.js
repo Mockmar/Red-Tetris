@@ -73,6 +73,12 @@ class Game {
 
         player.state = step(player.state)
 
+        const cleared = player.state.cleared || 0
+
+        if (cleared > 1) {
+          this.sendGarbage(player.socketId, cleared - 1)
+        }
+
         if (player.state.status === "over") {
           player.alive = false
         } else {
@@ -82,7 +88,7 @@ class Game {
 
       this.broadcastStates(io)
 
-      if (aliveCount <= 1) {
+      if (aliveCount === 0) {
         this.end(io)
       }
     }, 500)
@@ -120,6 +126,44 @@ class Game {
       players: this.getPlayersList(),
     })
   }
+
+  sendGarbage(fromSocketId, lines) {
+    for (const player of this.players.values()) {
+
+      if (player.socketId === fromSocketId) {
+        continue
+      }
+
+      if (!player.alive || !player.state) {
+        continue
+      }
+
+      player.state.board = this.addGarbageLines(player.state.board, lines)
+    }
+  }
+
+  addGarbageLines(board, lines) {
+    const width = board[0].length
+    const height = board.length
+
+    let newBoard = board.map(row => [...row])
+
+    for (let i = 0; i < lines; i++) {
+
+      newBoard.shift()
+
+      const hole = Math.floor(Math.random() * width)
+      // 8 pour differencier avec les pieces
+      const garbage = Array(width).fill(8)
+      garbage[hole] = 0
+
+      newBoard.push(garbage)
+    }
+
+    return newBoard
+  }
 }
+
+
 
 module.exports = Game
