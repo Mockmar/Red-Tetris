@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useParams } from "react-router-dom"
 import { io } from "socket.io-client"
 import BoardView from "./components/Board"
 import SpectrumView from "./components/SpectrumView"
@@ -6,13 +7,15 @@ import SpectrumView from "./components/SpectrumView"
 const socket = io("http://localhost:3000")
 
 function App() {
+  const { room: roomId, playerName } = useParams()
   const [room, setRoom] = useState(null)
   const [gameState, setGameState] = useState(null)
 
   useEffect(() => {
     socket.emit("join_room", {
-      roomId: "room42",
-      playerName: `jb-${Math.floor(Math.random() * 1000)}`    })
+      roomId,
+      playerName
+    })
 
     socket.on("room_update", (payload) => {
       console.log("room_update", payload)
@@ -44,7 +47,7 @@ function App() {
       socket.off("start_error")
       socket.off("game_over")
     }
-  }, [])
+  }, [roomId, playerName])
 
   useEffect(() => {
     function handleKeyDown(event) {
@@ -59,15 +62,15 @@ function App() {
       }
 
       if (event.key === "ArrowLeft") {
-        socket.emit("player_input", { roomId: "room42", type: "LEFT" })
+        socket.emit("player_input", { roomId, type: "LEFT" })
       } else if (event.key === "ArrowRight") {
-        socket.emit("player_input", { roomId: "room42", type: "RIGHT" })
+        socket.emit("player_input", { roomId, type: "RIGHT" })
       } else if (event.key === "ArrowDown") {
-        socket.emit("player_input", { roomId: "room42", type: "DOWN" })
+        socket.emit("player_input", { roomId, type: "DOWN" })
       } else if (event.key === "ArrowUp") {
-        socket.emit("player_input", { roomId: "room42", type: "ROTATE" })
+        socket.emit("player_input", { roomId, type: "ROTATE" })
       } else if (event.code === "Space") {
-        socket.emit("player_input", { roomId: "room42", type: "HARD_DROP" })
+        socket.emit("player_input", { roomId, type: "HARD_DROP" })
       }
     }
 
@@ -80,7 +83,7 @@ function App() {
     <div>
       <h1>Red Tetris</h1>
 
-      <button onClick={() => socket.emit("start_game", { roomId: "room42" })}>
+      <button onClick={() => socket.emit("start_game", { roomId })}>
         Start
       </button>
 
