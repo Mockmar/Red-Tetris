@@ -40,12 +40,17 @@ function App() {
       console.log("game_over", payload)
     })
 
+    socket.on("join_error", (payload) => {
+      console.log("join_error", payload)
+    })
+
     return () => {
       socket.off("room_update")
       socket.off("game_started")
       socket.off("game_state")
       socket.off("start_error")
       socket.off("game_over")
+      socket.off("join_error")
     }
   }, [roomId, playerName])
 
@@ -83,9 +88,11 @@ function App() {
     <div>
       <h1>Red Tetris</h1>
 
-      <button onClick={() => socket.emit("start_game", { roomId })}>
-        Start
-      </button>
+      {room?.status === "waiting" && (
+        <button onClick={() => socket.emit("start_game", { roomId })}>
+          Start
+        </button>
+      )}
 
       {gameState && (
         <BoardView

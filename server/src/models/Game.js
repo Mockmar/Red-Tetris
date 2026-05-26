@@ -1,4 +1,4 @@
-const { createInitialState } = require("../engine/state")
+const { createInitialState, createRandomPiece } = require("../engine/state")
 const { step } = require("../engine/reducer")
 const { getSpectrum } = require("../engine/board")
 
@@ -9,6 +9,28 @@ class Game {
     this.hostId = null
     this.status = "waiting"
     this.loop = null
+    this.sharedPieceSequence = []
+  }
+
+  fillPieceSequence(minLength = 14) {
+    while (this.sharedPieceSequence.length < minLength) {
+      this.sharedPieceSequence.push(createRandomPiece())
+    }
+  }
+
+  getNextPieceForPlayer(player) {
+    if (player.nextPieceIndex >= this.sharedPieceSequence.length) {
+      this.fillPieceSequence(player.nextPieceIndex + 1)
+    }
+
+    const nextPiece = this.sharedPieceSequence[player.nextPieceIndex]
+    player.nextPieceIndex += 1
+
+    if (this.sharedPieceSequence.length - player.nextPieceIndex < 7) {
+      this.fillPieceSequence(player.nextPieceIndex + 7)
+    }
+
+    return { ...nextPiece }
   }
 
   addPlayer(player) {
@@ -46,10 +68,15 @@ class Game {
     }
 
     this.status = "running"
+    this.sharedPieceSequence = []
+    this.fillPieceSequence()
+
+    const initialPiece = { ...this.sharedPieceSequence[0] }
 
     for (const player of this.players.values()) {
       player.alive = true
-      player.state = createInitialState()
+      player.nextPieceIndex = 1
+      player.state = createInitialState(initialPiece)
     }
 
     this.broadcastStates(io)
@@ -71,7 +98,7 @@ class Game {
           continue
         }
 
-        player.state = step(player.state)
+        player.state = step(player.state, () => this.getNextPieceForPlayer(player))
 
         const cleared = player.state.cleared || 0
 

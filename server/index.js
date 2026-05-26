@@ -65,6 +65,13 @@ io.on("connection", (socket) => {
 
     const game = gameManager.getOrCreateGame(roomId)
 
+    if (!gameManager.checkPlayernameUnique(roomId, playerName)) {
+      socket.emit("join_error", {
+        message: "Player name already taken in this room",
+      })
+      return
+    }
+
     if (game.status !== "waiting") {
       socket.emit("join_error", {
         message: "A game is already running in this room",
@@ -112,7 +119,7 @@ io.on("connection", (socket) => {
         player.state = rotate(player.state)
         break
       case "HARD_DROP":
-        player.state = hardDrop(player.state)
+        player.state = hardDrop(player.state, () => game.getNextPieceForPlayer(player))
         if (player.state.status === "over") {
           player.alive = false
         }

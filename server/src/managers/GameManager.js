@@ -24,6 +24,22 @@ class GameManager {
       this.games.delete(roomId)
     }
   }
+
+  checkPlayernameUnique(roomId, playerName) {
+    const game = this.games.get(roomId)
+
+    if (!game) {
+      return true
+    }
+
+    for (const player of game.players.values()) {
+      if (player.name === playerName) {
+        return false
+      }
+    }
+
+    return true
+  }
 }
 
 module.exports = GameManager

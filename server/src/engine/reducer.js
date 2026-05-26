@@ -10,11 +10,11 @@ function movePiece(piece, dx, dy) {
   }
 }
 
-function lockPieceAndSpawn(state, piece) {
+function lockPieceAndSpawn(state, piece, getNextPiece) {
   const mergedBoard = mergePieceIntoBoard(state.board, piece)
   const { board: clearedBoard, cleared } = clearLines(mergedBoard)
 
-  const newPiece = createRandomPiece()
+  const newPiece = getNextPiece ? getNextPiece() : createRandomPiece()
 
   if (!canPlace(clearedBoard, newPiece)) {
     return {
@@ -75,7 +75,7 @@ function moveDown(state) {
   }
 }
 
-function step(state) {
+function step(state, getNextPiece) {
   const nextPiece = movePiece(state.activePiece, 0, 1)
 
   if (canPlace(state.board, nextPiece)) {
@@ -95,7 +95,7 @@ function step(state) {
     }
   }
 
-  return lockPieceAndSpawn(state, state.activePiece)
+  return lockPieceAndSpawn(state, state.activePiece, getNextPiece)
 }
 
 function rotate(state) {
@@ -114,7 +114,7 @@ function rotate(state) {
   }
 }
 
-function hardDrop(state) {
+function hardDrop(state, getNextPiece) {
   let droppedPiece = state.activePiece
 
   while (true) {
@@ -127,7 +127,7 @@ function hardDrop(state) {
     droppedPiece = nextPiece
   }
 
-  return lockPieceAndSpawn(state, droppedPiece)
+  return lockPieceAndSpawn(state, droppedPiece, getNextPiece)
 }
 
 module.exports = {

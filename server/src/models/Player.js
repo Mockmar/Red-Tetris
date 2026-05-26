@@ -4,6 +4,7 @@ class Player {
     this.name = name
     this.alive = true
     this.state = null
+    this.nextPieceIndex = 0
   }
 }
 

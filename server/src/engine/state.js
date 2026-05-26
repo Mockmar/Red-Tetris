@@ -19,10 +19,10 @@ function createRandomPiece() {
   return createPiece(type)
 }
 
-function createInitialState() {
+function createInitialState(activePiece = createRandomPiece()) {
   return {
     board: createEmptyBoard(),
-    activePiece: createRandomPiece(),
+    activePiece,
     touchingFloor: false,
     status: "running",
   }
