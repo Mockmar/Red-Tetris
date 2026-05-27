@@ -15,10 +15,14 @@ export default function BoardView({ board, piece }) {
         row.map((cell, x) => {
           const isLockedBlock = cell !== 0
           const isActiveBlock = isPieceCell(piece, x, y, matrix)
+          const isGarbage = cell === 8
 
           let color = "#111"
 
-          if (isLockedBlock) {
+          if (isGarbage) {
+            color = "blue"
+          }
+          else if (isLockedBlock) {
             color = "red"
           } else if (isActiveBlock) {
             color = "cyan"

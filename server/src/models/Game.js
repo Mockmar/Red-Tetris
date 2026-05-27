@@ -118,7 +118,7 @@ class Game {
       if (aliveCount === 0) {
         this.end(io)
       }
-    }, 500)
+    }, 1000)//500
   }
 
   broadcastStates(io) {
@@ -179,10 +179,8 @@ class Game {
 
       newBoard.shift()
 
-      const hole = Math.floor(Math.random() * width)
       // 8 pour differencier avec les pieces
       const garbage = Array(width).fill(8)
-      garbage[hole] = 0
 
       newBoard.push(garbage)
     }

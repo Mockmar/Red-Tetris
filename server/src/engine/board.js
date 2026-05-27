@@ -50,7 +50,7 @@ function mergePieceIntoBoard(board, piece) {
 
 function clearLines(board) {
   const remainingRows = board.filter((row) =>
-    row.some((cell) => cell === 0)
+    row.some((cell) => cell === 0 || cell === 8)
   )
 
   const cleared = BOARD_HEIGHT - remainingRows.length
