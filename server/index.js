@@ -136,6 +136,8 @@ io.on("connection", (socket) => {
 
     for (const [roomId, game] of gameManager.games.entries()) {
       if (game.getPlayer(socket.id)) {
+        const wasHost = game.hostId === socket.id
+
         game.removePlayer(socket.id)
 
         io.to(roomId).emit("room_update", {
@@ -144,6 +146,10 @@ io.on("connection", (socket) => {
           status: game.status,
           players: game.getPlayersList(),
         })
+
+        if (wasHost && game.hostId) {
+          io.to(roomId).emit("host_changed", { hostId: game.hostId })
+        }
 
         if (game.players.size === 0 && game.loop) {
           clearInterval(game.loop)

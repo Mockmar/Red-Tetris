@@ -92,6 +92,7 @@ class Game {
 
     this.loop = setInterval(() => {
       let aliveCount = 0
+      let alivePlayers = []
 
       for (const player of this.players.values()) {
         if (!player.alive || !player.state) {
@@ -140,7 +141,7 @@ class Game {
     }
   }
 
-  end(io) {
+  end(io, winner) {
     if (this.loop) {
       clearInterval(this.loop)
       this.loop = null
@@ -148,9 +149,24 @@ class Game {
 
     this.status = "finished"
 
+    const players = this.getPlayersList()
+    const winnerId = winner ? winner.socketId : null
+    const winnerName = winner ? winner.name : null
+
+    const results = players.map((player) => ({
+      socketId: player.socketId,
+      name: player.name,
+      result: player.socketId === winnerId ? "win" : "game_over",
+    }))
+
     io.to(this.roomId).emit("game_over", {
       roomId: this.roomId,
-      players: this.getPlayersList(),
+      status: this.status,
+      hostId: this.hostId,
+      winnerId,
+      winnerName,
+      results,
+      players,
     })
   }
 

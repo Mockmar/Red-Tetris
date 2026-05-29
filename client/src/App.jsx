@@ -10,6 +10,7 @@ function App() {
   const { room: roomId, playerName } = useParams()
   const [room, setRoom] = useState(null)
   const [gameState, setGameState] = useState(null)
+  const [gameOver, setGameOver] = useState(null)
 
   useEffect(() => {
     socket.emit("join_room", {
@@ -38,6 +39,7 @@ function App() {
 
     socket.on("game_over", (payload) => {
       console.log("game_over", payload)
+      setGameOver(payload)
     })
 
     socket.on("join_error", (payload) => {
@@ -88,10 +90,27 @@ function App() {
     <div>
       <h1>Red Tetris</h1>
 
-      {room?.status === "waiting" && (
+      {gameOver && (
+        <div style={{ marginBottom: 16 }}>
+          {gameOver.winnerId === socket.id ? (
+            <h2 style={{ color: "green" }}>Gagné !</h2>
+          ) : (
+            <h2 style={{ color: "red" }}>Game Over</h2>
+          )}
+          {gameOver.winnerName && gameOver.winnerId !== socket.id && (
+            <p>Le gagnant est {gameOver.winnerName}</p>
+          )}
+        </div>
+      )}
+
+      {room?.status === "waiting" && room?.hostId === socket.id && !gameOver && (
         <button onClick={() => socket.emit("start_game", { roomId })}>
           Start
         </button>
+      )}
+
+      {room && room.hostId === socket.id && (
+        <p style={{ color: "green" }}>Vous êtes l'hôte de la room</p>
       )}
 
       {gameState && (
@@ -105,7 +124,11 @@ function App() {
         {gameState && gameState.BoardView}
       </div>
 
-      <h2>Other players</h2>
+      <h2>Players</h2>
+
+      <div>
+        <p><strong>Vous:</strong> {playerName} {room?.hostId === socket.id ? '(host)' : ''}</p>
+      </div>
 
       {gameState?.players?.map((player) => {
         if (player.socketId === socket.id) {
@@ -114,7 +137,7 @@ function App() {
 
         return (
           <div key={player.socketId}>
-            <p>{player.name}</p>
+            <p>{player.name} {room?.hostId === player.socketId ? '(host)' : ''}</p>
             <SpectrumView spectrum={player.spectrum} />
           </div>
         )
